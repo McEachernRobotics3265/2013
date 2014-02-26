@@ -1,0 +1,78 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package edu.wpi.first.wpilibj.templates;
+
+import edu.wpi.first.wpilibj.Joystick;
+
+/**
+ *
+ * @author Team3265
+ */
+public class UserMap {
+    
+    public static final int DRIVE_JOYSTICK_PORT = 1;
+    public static final int COMPRESSOR_BUTTON = 3;
+    public static final int LAUNCH_BUTTON = 1;
+    
+    private static boolean shouldCompressorRun = false;
+    private static boolean previousCompressorButtonState = false;
+    
+    public static Joystick driveJoystick;
+    private static double min_voltage = .5;
+    private static double voltage_range = 5.0 - min_voltage;
+    private static double min_distance = 3.0;
+    private static double distance_range = 60.0 - min_distance;
+    
+    public static void init() {
+        driveJoystick = new Joystick(DRIVE_JOYSTICK_PORT);
+    }
+    
+    public static double getLeftRightValue() {
+        return driveJoystick.getX();
+    }
+    
+    public static double getForwardBackValue() {
+        return driveJoystick.getY() * -1;
+    }
+    
+    public static double getLaunchWheelPower() {
+        double power = driveJoystick.getZ();
+        power = power + 1;
+        power = power / 2;
+        power = 1 - power;
+        return power;
+    }
+    
+    public static boolean runCompressor() {
+        if(driveJoystick.getRawButton(COMPRESSOR_BUTTON) && !previousCompressorButtonState) {
+            shouldCompressorRun = !shouldCompressorRun;
+        }
+        
+        previousCompressorButtonState = driveJoystick.getRawButton(COMPRESSOR_BUTTON);
+        
+        return shouldCompressorRun;
+    }
+    
+    public static boolean getLaunchState() {
+        return driveJoystick.getRawButton(LAUNCH_BUTTON);
+    }
+    
+    public static double findDistance() {
+        double range;
+        range = RobotParts.sonar.getVoltage();
+        if (range < min_voltage){
+            return -2.0;
+        }
+        range =( range - min_voltage) / voltage_range;
+        range = (range * distance_range) + min_distance;
+        return range;
+        
+         
+        
+    }
+    
+}
