@@ -1,0 +1,104 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package edu.wpi.first.wpilibj.templates;
+
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Jaguar;
+import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.AnalogChannel;
+import edu.wpi.first.wpilibj.Gyro;
+import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.DigitalModule;
+
+/**
+ *
+ * @author Team3265
+ */
+public class RobotParts {
+    public static final int JAGUAR_LEFT_PORT = 1;
+    public static final int JAGUAR_RIGHT_PORT = 2;
+    public static final int SHOOTER_PORT_1 = 4;
+    public static final int SHOOTER_PORT_2 = 7;
+    public static final int COMPRESSOR_CONTROL = 1;
+    public static final int COMPRESSOR_RELAY = 1;
+    public static final int LAUNCH_EXTENDER_PORT = 5;
+    public static final int LAUNCH_RETRACTER_PORT = 6;
+    public static final int LEFT_ENCODER_A = 5;
+    public static final int LEFT_ENCODER_B = 2;
+    public static final int RIGHT_ENCODER_A = 3;
+    public static final int RIGHT_ENCODER_B = 4;
+    public static final int ANALOG_CHANNEL = 3;
+    public static final int SONAR_CHANNEL = 2;         //sonar
+    
+    //UNTESTED
+    public static final int GYRO_CHANNEL = 1;
+    
+    
+    public static RobotDrive robotDrive;
+    public static Jaguar shooterMotorOne;
+    public static Jaguar shooterMotorTwo;
+    public static Compressor compressor;
+    public static Solenoid launchSolenoidExtend;
+    public static Solenoid launchSolenoidRetract;
+    public static Encoder frontLeft;
+    public static Encoder frontRight;
+    public static AnalogChannel sonar;
+    public static Gyro gyro; //new
+    public static double Kp = 0.03;
+    public static I2C i2c;
+    byte[] toSend = new byte[1];
+    
+    
+    
+    // sonar distance calculation values
+    private static double min_voltage = .5;
+    private static double voltage_range = 5.0 - min_voltage;
+    private static double min_distance = 3.0;
+    private static double distance_range = 60.0 - min_distance;
+    
+    public static void setShooterSpeed(double speed) {
+        shooterMotorOne.set(speed);
+        shooterMotorTwo.set(speed);
+    }
+    
+    public static void init() {
+        robotDrive = new RobotDrive(JAGUAR_LEFT_PORT, JAGUAR_RIGHT_PORT);
+        shooterMotorOne = new Jaguar(SHOOTER_PORT_1);
+        shooterMotorTwo = new Jaguar(SHOOTER_PORT_2);
+        compressor=new Compressor(COMPRESSOR_CONTROL, COMPRESSOR_RELAY);
+        launchSolenoidExtend = new Solenoid(LAUNCH_EXTENDER_PORT);
+        launchSolenoidRetract = new Solenoid(LAUNCH_RETRACTER_PORT);
+        gyro = new Gyro(GYRO_CHANNEL);
+        sonar = new AnalogChannel (SONAR_CHANNEL);
+        DigitalModule module = DigitalModule.getInstance(2);
+        i2c = module.getI2C(168);
+        //frontLeft = new Encoder(LEFT_ENCODER_A, LEFT_ENCODER_B);
+        //frontRight = new Encoder (RIGHT_ENCODER_A, RIGHT_ENCODER_B);
+        //frontLeft.start();
+        //frontRight.start();
+       // frontLeft.setDistancePerPulse(.000623);
+        //frontRight.setDistancePerPulse(.000623);
+    }
+
+
+
+public static double getDistance()
+    {
+       double range = sonar.getVoltage();
+       System.out.println("Sonar Voltage: " + range);
+        if (range < min_voltage){
+            return -2.0;
+        }
+        range = (range - min_voltage) / voltage_range;
+        range = (range * distance_range) + min_distance;
+        System.out.println("Calculated range : " + range);
+        return range; 
+    }
+
+}
