@@ -1,0 +1,93 @@
+/*----------------------------------------------------------------------------*/
+/* Copyright (c) FIRST 2008. All Rights Reserved.                             */
+/* Open Source Software - may be modified and shared by FRC teams. The code   */
+/* must be accompanied by the FIRST BSD license file in the root directory of */
+/* the project.                                                               */
+/*----------------------------------------------------------------------------*/
+
+package edu.wpi.first.wpilibj.templates;
+
+
+import edu.wpi.first.wpilibj.SimpleRobot;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+/**
+ * The VM is configured to automatically run this class, and to call the
+ * functions corresponding to each mode, as described in the SimpleRobot
+ * documentation. If you change the name of this class or the package after
+ * creating this project, you must also update the manifest file in the resource
+ * directory.
+ */
+public class Robot2013Rewrite extends SimpleRobot {
+    
+    //private VisionTracking vt;
+    
+    public Robot2013Rewrite() {
+        RobotParts.init();
+        UserMap.init();
+       // vt = new VisionTracking();
+        //vt.robotInit();
+    }
+    
+    /**
+     * This function is called once each time the robot enters autonomous mode.
+     */
+    public void autonomous() {
+        //retract shooter first
+        
+        RobotParts.gyro.reset();
+        int count = 0;
+        while(isAutonomous() && count < 30){
+            double angle = RobotParts.gyro.getAngle();
+            System.out.println("Angle = " + angle);
+            RobotParts.robotDrive.arcadeDrive(-.75, RobotParts.Kp * -angle);
+            Timer.delay(0.1);
+            count++;
+        }
+    }
+
+    /**
+     * This function is called once each time the robot enters operator control.
+     */
+    public void operatorControl() {
+        while(isOperatorControl() && isEnabled()) {
+            RobotParts.setShooterSpeed(UserMap.getLaunchWheelPower());
+            
+            
+            if (UserMap.getLaunchState()) {
+                RobotParts.launchSolenoidExtend.set(true);
+                RobotParts.launchSolenoidRetract.set(false);
+            }
+            else {
+                RobotParts.launchSolenoidExtend.set(false);
+                RobotParts.launchSolenoidRetract.set(true);
+            }
+            
+            RobotParts.robotDrive.arcadeDrive(UserMap.getForwardBackValue(), UserMap.getLeftRightValue());
+            
+            if (UserMap.runCompressor()){
+                RobotParts.compressor.start();
+            }
+            else {
+                RobotParts.compressor.stop();
+            }
+            
+            //double leftDis = RobotParts.frontLeft.getDistance();
+            //System.out.println("Left Distance = " + leftDis);
+            
+            //vt.checkForTarget();
+            //SmartDashboard.putNumber("Distance", UserMap.findDistance());
+            
+            Timer.delay(0.01); 
+        }
+       
+    }
+    
+    /**
+     * This function is called once each time the robot enters test mode.
+     */
+    public void test() {
+    
+    }
+}
